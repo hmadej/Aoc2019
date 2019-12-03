@@ -12,22 +12,20 @@ ADD = 1
 MUL = 2
 HALT = 99
 
-input_string, position = '', 0
+position = 0
 
 
 def getChar():
-    global input_string, position, EOF, file
+    global position, file
     char = file.read(1)
-
-    input_string += char
     position += 1
-    return input_string[position-1]
+    return char
 
 def peekChar():
     position, file
     char = file.read(1)
-
     file.seek(position)
+    
     return char
 
 
