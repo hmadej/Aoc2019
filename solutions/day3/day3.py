@@ -16,9 +16,6 @@ digit     -> '0' | '1' | ... | '9'
 '''
 symbols = ('0', '1', '2', '3', '4', '5', '6', '7', '8', '9')
 file_position = 0
-steps_taken = dict()
-intersections = []
-queue = []
 
 
 def getChar():
@@ -35,41 +32,32 @@ def peekChar():
 
 
 def program():
-    global intersections, queue, file_position
-    file_position = 0
 
-    lines1 = wire()
+    points1 = wire()
     if (ord(peekChar()) != 10):
         print(peekChar())
         raise ValueError("Expected newline separating wires")
     else:
         getChar()
 
-    # insert intersections back into queue
-    intersections = queue.copy()
-    queue.clear()
+    points2 = wire()
 
-    lines2 = wire()
-
-    return (lines1, lines2)
+    return (points1, points2)
 
 def wire():
     steps = 0
-    moves = set()
+    steps_taken = dict()
     position = (0, 0)
 
-    position, points, steps = move(position, steps)
-    moves.update(points)
+    position, steps_taken, steps = move(position, steps_taken, steps)
 
     while (peekChar() == ','):
         getChar()
-        position, points, steps = move(position, steps)
-        moves.update(points)
+        position, steps_taken, steps = move(position, steps_taken, steps)
 
-    return moves
+    return steps_taken
 
-def move(pos, steps): # (x, y), steps -> new (x, y), [(x,y), ...], steps
-    global queue
+def move(pos, steps_taken, steps):
     direct = direction()
     magnitude = digits()
     point = (0,0)
@@ -88,15 +76,10 @@ def move(pos, steps): # (x, y), steps -> new (x, y), [(x,y), ...], steps
 
     for increment in range(1, magnitude+1):
         point = pos[0] + x * (increment), pos[1] + y * (increment)
-        points.add(point)
-        # check if visited already, otherwise add magnitude to steps to intersection
-        # use queue, once visited pop from queue
-        if point in intersections:
-            intersections.remove(point)
-            steps_taken[point] += steps + increment
-            queue.append(point)
+        if point not in steps_taken.keys():
+            steps_taken[point] = steps + increment
 
-    return point, points, steps + magnitude
+    return point, steps_taken, (steps + magnitude)
 
 def direction():
     return getChar()
@@ -111,16 +94,16 @@ def digits():
 
 
 with open("day3.txt") as file:
-    lines = program()
-    intersections = list(lines[0].intersection(lines[1]))
+    wire1, wire2 = program()
+    points1, points2 = set(wire1.keys()), set(wire2.keys())
+    intersections = list(points1.intersection(points2))
     shortest_intersection = reduce(min, map(lambda x : abs(x[0]) + abs(x[1]), intersections))
     print("Day 3 Part 1: {0}".format(shortest_intersection))
 
-with open("day3.txt") as file:
-    for intersect in intersections:
-        steps_taken[intersect] = 0
-    lines = program()
-    smallest_steps_taken = reduce(min, steps_taken.values())
-    print("Day 3 Part 2: {0}".format(smallest_steps_taken))
+    steps = []
+    for point in intersections:
+        steps.append(wire1[point] + wire2[point])
 
+    smallest_steps_taken = reduce(min, steps)
+    print("Day 3 Part 2: {0}".format(smallest_steps_taken))
 
