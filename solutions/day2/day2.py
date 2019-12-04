@@ -19,7 +19,6 @@ INPUT2_OFFSET = 2
 
 position = 0
 
-
 def getChar():
     global position, file
     char = file.read(1)
@@ -32,7 +31,6 @@ def peekChar():
     file.seek(position)
     
     return char
-
 
 def program():
     ops = opcode()
@@ -85,25 +83,6 @@ def memoryLocation():
 
     return int(digit)
 
-def evaluate1(program):
-    for instu_pointer in range(len(program) // 4):
-        if program[instu_pointer*4] == ADD:
-            program[program[instu_pointer*4 + 3]] = (
-                program[program[instu_pointer*4 + 1]] + 
-                program[program[instu_pointer*4 + 2]]
-              )
-        elif program[instu_pointer*4] == MUL:
-            program[program[instu_pointer*4 + 3]] = (
-                program[program[instu_pointer*4 + 1]] * 
-                program[program[instu_pointer*4 + 2]]
-            )
-        elif program[instu_pointer*4] == HALT:
-            break
-        else:
-            raise ValueError("something bad happened!")
-
-    return program[0]
-
 def evaluate(program):
     instu_pointer = 0
     while (1):
@@ -131,13 +110,11 @@ with open("day2.txt", "r") as file:
     program = program()
     print(evaluate(program.copy()))
     
-
     for noun in range(100):
         for verb in range(100):
             p = program.copy()
             p[1], p[2] = noun, verb
             result = evaluate(p)
             if (result == 19690720):
-                print(noun, verb)
                 print(100 * noun + verb)
                 break
