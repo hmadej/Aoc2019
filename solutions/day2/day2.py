@@ -12,6 +12,11 @@ ADD = 1
 MUL = 2
 HALT = 99
 
+
+OUTPUT_OFFSET = 3
+INPUT1_OFFSET = 1
+INPUT2_OFFSET = 2
+
 position = 0
 
 
@@ -80,7 +85,7 @@ def memoryLocation():
 
     return int(digit)
 
-def evaluate(program):
+def evaluate1(program):
     for instu_pointer in range(len(program) // 4):
         if program[instu_pointer*4] == ADD:
             program[program[instu_pointer*4 + 3]] = (
@@ -96,6 +101,29 @@ def evaluate(program):
             break
         else:
             raise ValueError("something bad happened!")
+
+    return program[0]
+
+def evaluate(program):
+    instu_pointer = 0
+    while (1):
+        if program[instu_pointer] == ADD:
+            result = (
+                program[program[instu_pointer + INPUT1_OFFSET]] +
+                program[program[instu_pointer + INPUT2_OFFSET]]
+                )
+            program[program[instu_pointer + OUTPUT_OFFSET]] = result
+            instu_pointer += 4
+        elif program[instu_pointer] == MUL:
+            result = (
+                program[program[instu_pointer + INPUT1_OFFSET]] *
+                program[program[instu_pointer + INPUT2_OFFSET]]
+                )
+            program[program[instu_pointer + OUTPUT_OFFSET]] = result
+            instu_pointer += 4
+        elif program[instu_pointer] == HALT:
+            instu_pointer += 1
+            break
 
     return program[0]
 
