@@ -39,15 +39,12 @@ class Instruction():
         value1 = (self.input_1 if self.mode_1 == 1 else _seek(memory, self.input_1))
         value2 = (self.input_2 if self.mode_2 == 1 else _seek(memory, self.input_2))
 
-        #print("v1, v2:", value1, value2)
-
         if self.op == ADD:
             memory[self.output] = value1 + value2
 
         elif self.op == MUL:
             memory[self.output] = value1 * value2
 
-        # TODO: implement new opcodes and instructions
         elif self.op == JMPT:
             if value1 != 0:
                 _jump(memory, value2)
@@ -74,59 +71,6 @@ class Instruction():
         else:
             raise ValueError("Unknown Operation {0}".format(self.op))
 
-# TODO: finish implementing jump for moving file pointer and memory pointer
-def _jump(memory, pointer):
-    global file, gPOSITION, gMEMORY_PTR
-
-    offset = gMEMORY_PTR - pointer
-    if offset > 0:
-        while (offset != 0):
-            if (peekChar() == ','):
-                offset -= 1
-                argument()
-            elif (peekChar() == ''):
-                break
-
-    else:
-        gPOSITION = 0
-        gMEMORY_PTR = 0
-        file.seek(0)
-        while (gMEMORY_PTR != pointer):
-            if (peekChar() == ','):
-                gMEMORY_PTR += 1
-            getChar()
-
-        gPOSITION -= 1
-        file.seek(gPOSITION)
-
-
-def _seek(memory, pointer):
-    global file, gPOSITION
-
-    #print("SEEK", pointer)
-    #print(gMEMORY_TABLE, gMEMORY_PTR)
-    if pointer in memory.keys():
-        return memory[pointer]
-    else:
-        offset = 0
-        temp_gPOSITION = gPOSITION
-        gPOSITION = 0
-        file.seek(0)
-        while (offset != pointer):
-            if (peekChar() == ','):
-                offset += 1
-            getChar()
-
-
-        if (peekChar() == ','):
-            getChar() # consume ','
-
-        val = value()
-        memory[pointer] = val
-
-        file.seek(temp_gPOSITION)
-        gPOSITION = temp_gPOSITION
-        return memory[pointer]
 
 def getChar():
     global gPOSITION, file
@@ -178,8 +122,6 @@ def opcode():
     while(peekChar() != ',' and peekChar() != ''):
         op_string += getChar()
 
-    #print("OPCODE", op_string, gMEMORY_PTR)
-
     if gMEMORY_PTR in gMEMORY_TABLE.keys():
         instr_value = gMEMORY_TABLE[gMEMORY_PTR]
         op_string = str(instr_value)
@@ -189,9 +131,7 @@ def opcode():
         add_to_table(instr_value)
 
     op_length = len(op_string)
-    #print(op_string)
     modes = param_modes(op_string)
-    #print(modes)
 
     if op_string[-1] == '1':
         args = arguments3()
@@ -232,7 +172,6 @@ def opcode():
     elif op_string[-1] == '9':
         if (peekChar() == ''): # no additional memory locations
             Instruction(HALT, modes, (0,0,0)).execute(gMEMORY_TABLE)
-
         else:
             memory()
             Instruction(HALT, modes, (0,0,0)).execute(gMEMORY_TABLE)
@@ -295,6 +234,60 @@ def value():
         digit += getChar()
 
     return int(digit)
+
+
+
+def _jump(memory, pointer):
+    global file, gPOSITION, gMEMORY_PTR
+
+    offset = gMEMORY_PTR - pointer
+    if offset > 0:
+        while (offset != 0):
+            if (peekChar() == ','):
+                offset -= 1
+                argument()
+            elif (peekChar() == ''):
+                break
+
+    else:
+        gPOSITION = 0
+        gMEMORY_PTR = 0
+        file.seek(0)
+        while (gMEMORY_PTR != pointer):
+            if (peekChar() == ','):
+                gMEMORY_PTR += 1
+            getChar()
+
+        gPOSITION -= 1
+        file.seek(gPOSITION)
+
+
+def _seek(memory, pointer):
+    global file, gPOSITION
+
+    if pointer in memory.keys():
+        return memory[pointer]
+    else:
+        offset = 0
+        temp_gPOSITION = gPOSITION
+        gPOSITION = 0
+        file.seek(0)
+        while (offset != pointer):
+            if (peekChar() == ','):
+                offset += 1
+            getChar()
+
+
+        if (peekChar() == ','):
+            getChar() # consume ','
+
+        val = value()
+        memory[pointer] = val
+
+        file.seek(temp_gPOSITION)
+        gPOSITION = temp_gPOSITION
+        return memory[pointer]
+
 
 with open("day5.txt", "r") as file:
     parse()
