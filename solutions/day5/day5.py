@@ -95,6 +95,7 @@ def add_to_table(value):
 
 def parse():
     global gMEMORY_PTR, gPOSITION, gMEMORY_TABLE
+    
     gPOSITION = 0
     gMEMORY_PTR = 0
     gMEMORY_TABLE = dict()
