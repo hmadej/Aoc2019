@@ -9,6 +9,7 @@ JMPT = 5
 JMPF = 6
 LESS = 7
 EQUA = 8
+RELB = 9
 HALT = 99
 
 class Instruction():
@@ -56,6 +57,8 @@ class Instruction():
         elif self.op == WRIT:
             parser.machine_state.out_pipe.set_output(value1)
 
+        elif self.op == RELB:
+            pass
             
         elif self.op == HALT:
             pass

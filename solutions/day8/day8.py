@@ -58,7 +58,7 @@ def pixel():
 
 def draw(frame_buffer):
     for row in frame_buffer:
-        print(row)
+        print(reduce(lambda x, y : x + ('  ' if y == '0' else '\u2591\u2591'), row, ''))
 
 def update(frame_buffer, next_layer):
     new_frame = ''
