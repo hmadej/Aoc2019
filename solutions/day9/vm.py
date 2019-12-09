@@ -91,8 +91,8 @@ class Machine():
 
         elif opcode == Instruction.WRITE.value:
             parameter_1 = self.read()
-            self.out_pipe.set_output(parameter_1)
-            print(self.get_memory(mode1, parameter_1))
+            output = self.get_memory(mode1, parameter_1)
+            self.out_pipe.set_output(output)
 
         elif opcode == Instruction.JMPT.value:
             parameter_1 = self.read()
