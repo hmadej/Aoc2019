@@ -1,5 +1,5 @@
 from functools import reduce
-from math import sqrt, cos
+from time import sleep
 
 gPOSITION = 0
 
@@ -68,7 +68,7 @@ def draw(map):
         for x in range(41):
             print(map[(x,y)], end = '')
         print()
-    input()
+    sleep(0.1)
 
 def quadrant(a, b):
     x = a[0] - b[0]
@@ -108,44 +108,43 @@ def visible(asteroid_map, start, w):
 
 
 def dist(a, b):
-    return sqrt((b[0] - a[0]) * (b[0] - a[0]) + (b[1] - a[1]) * (b[1] - a[1]))
+    return (b[0] - a[0]) * (b[0] - a[0]) + (b[1] - a[1]) * (b[1] - a[1])
 
 
 def sweep(asteroid_map, gmap):
-    order = []
     count = 0
     while count < 200:
         for index in range(4):
             print("Q{0}".format(index))
             remove = []
-            #print("{0}BEFORE:".format(index), asteroid_map[index])
             if asteroid_map[index]:
                 previous_asteroid = asteroid_map[index][0]
                 remove.append(previous_asteroid)
-                order.append(previous_asteroid)
                 count += 1
+
                 gmap[previous_asteroid[1]] = 'B'
                 print("BLASTED: {0}".format(previous_asteroid))
                 draw(gmap)
+
                 if count == 200:
-                    return previous_asteroid, order
+                    return previous_asteroid
 
                 for asteroid in asteroid_map[index][1:]:
                     if previous_asteroid[0] != asteroid[0]:
                         previous_asteroid = asteroid
+
                         gmap[previous_asteroid[1]] = 'B'
                         print("BLASTED: {0}".format(previous_asteroid))
                         draw(gmap)
+
                         remove.append(asteroid)
-                        order.append(previous_asteroid)
                         count += 1
                         if count == 200:
-                            return previous_asteroid, order
+                            return previous_asteroid
 
             for asteroid in remove:
                 asteroid_map[index].remove(asteroid)
 
-            #print("{0}AFTER:".format(index), asteroid_map[index])
 
 with open('day10.txt', 'r') as file:
     dimensions, asteroid_map, galaxy_map = parse()
@@ -161,13 +160,15 @@ with open('day10.txt', 'r') as file:
             max_asteroid = asteroid
             max_slope_maps = slope_maps
 
-    print(max_asteroid, max_count)
 
     for index in range(4):
         max_slope_maps[index].sort(key = lambda x : dist(max_asteroid, x[1]))
         max_slope_maps[index].sort(key = lambda x : x[0], reverse = True)
 
     galaxy_map[max_asteroid] = 'X'
-    a, b = sweep(max_slope_maps, galaxy_map)
-    #print(b)
+
+    asteroid_200 = sweep(max_slope_maps, galaxy_map)
+    print("Day 10 Part 1: {0}".format(max_count))
+    print("Day 10 Part 2: {0}".format(asteroid_200))
+
     
