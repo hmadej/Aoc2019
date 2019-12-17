@@ -1,10 +1,10 @@
 from enum import Enum
 from pipes import Pipe
 
-
 POSITIONAL = 0
-IMMEDIATE  = 1
-RELATIVE   = 2
+IMMEDIATE = 1
+RELATIVE = 2
+
 
 class Instruction(Enum):
     ADD = 1
@@ -18,20 +18,23 @@ class Instruction(Enum):
     RELB = 9
     HALT = 99
 
+
 class Mode(Enum):
     POSITIONAL = 0
-    IMMEDIATE  = 1
-    RELATIVE   = 2
+    IMMEDIATE = 1
+    RELATIVE = 2
+
 
 def is_numeric(char):
     if char == '':
         return False
     value = ord(char)
-    if (value >= 48 and value <= 57):
+    if 48 <= value <= 57:
         return True
     return False
 
-class Machine():
+
+class Machine:
     def __init__(self, memory, in_pipe, out_pipe, args):
         self.memory = memory
         self.instruction_pointer = 0
@@ -43,7 +46,6 @@ class Machine():
     def execute(self):
         while (self.memory[self.instruction_pointer] != Instruction.HALT.value):
             self.interpret()
-
 
     def interpret(self):
         '''
@@ -98,7 +100,7 @@ class Machine():
             parameter_1 = self.read()
             parameter_2 = self.read()
             input_1 = self.get_memory(mode1, parameter_1)
-            if (input_1 != 0):
+            if input_1 != 0:
                 input_2 = self.get_memory(mode2, parameter_2)
                 self.instruction_pointer = input_2 - 1
 
@@ -106,7 +108,7 @@ class Machine():
             parameter_1 = self.read()
             parameter_2 = self.read()
             input_1 = self.get_memory(mode1, parameter_1)
-            if (input_1 == 0):
+            if input_1 == 0:
                 input_2 = self.get_memory(mode2, parameter_2)
                 self.instruction_pointer = input_2 - 1
 
@@ -131,15 +133,15 @@ class Machine():
             parameter_1 = self.read()
             input_1 = self.get_memory(mode1, parameter_1)
             self.relative_base += input_1
-        
+
         elif opcode == Instruction.HALT.value:
             pass
 
         else:
             raise ValueError("Invalid OPCODE @ IP:{0} CODE:{1}".format(self.instruction_pointer, opcode))
-    
+
         self.instruction_pointer += 1
-            
+
     def read(self):
         self.instruction_pointer += 1
         return self.memory[self.instruction_pointer]
@@ -151,8 +153,6 @@ class Machine():
         else:
             self.memory[pointer] = 0
         return val
-        
-
 
     def get_memory(self, mode, parameter):
         if mode == Mode.POSITIONAL.value:
@@ -175,18 +175,19 @@ class Machine():
 
         self.memory[address] = result
 
-class Parser():
+
+class Parser:
     def __init__(self, file):
         self.filename = file
         self.position = 0
         self.file_pointer = None
 
-    def getChar(self):
+    def get_char(self):
         char = self.file_pointer.read(1)
         self.position += 1
         return char
 
-    def peekChar(self):
+    def peek_char(self):
         char = self.file_pointer.read(1)
         self.file_pointer.seek(self.position)
         return char
@@ -195,20 +196,18 @@ class Parser():
         program_memory = dict()
         index = 0
         with open(self.filename, 'r') as self.file_pointer:
-            while (self.peekChar() != ''):
+            while self.peek_char() != '':
                 program_memory[index] = self.numeric()
                 index += 1
-                self.getChar()
+                self.get_char()
 
         return program_memory
-
 
     def numeric(self):
         # digit
         value = ''
-        if (self.peekChar() == '-'):
-            value += self.getChar()
-        while (is_numeric(self.peekChar())): #(48 - 57)
-            value += self.getChar()
+        if self.peek_char() == '-':
+            value += self.get_char()
+        while is_numeric(self.peek_char()):  # (48 - 57)
+            value += self.get_char()
         return int(value)
-

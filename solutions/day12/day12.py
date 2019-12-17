@@ -14,78 +14,85 @@ digit      -> '0' | '1' | ... | '9'
 '''
 pos = 0
 
-def getChar():
+
+def get_char():
     global pos, file
     char = file.read(1)
     pos += 1
 
     return char
 
-def peekChar():
+
+def peek_char():
     global pos, file
     char = file.read(1)
     file.seek(pos)
 
     return char
 
+
 def parse():
     global pos
     pos = 0
-    positions = []
-    positions.append(position())
-    getChar()
-    while (peekChar() != ''):
+    positions = [position()]
+    get_char()
+    while peek_char() != '':
         positions.append(position())
-        if (peekChar() == '\n'):
-            getChar()
+        if peek_char() == '\n':
+            get_char()
 
     return positions
 
+
 def position():
-    c = peekChar()
-    if (c != '<'):
+    c = peek_char()
+    if c != '<':
         raise ValueError("Expecting '<' at position {0} but was {1}".format(pos, c))
-    getChar()
-    
+    get_char()
+
     pos_tuple = args()
 
-    c = peekChar()
-    if (c != '>'):
+    c = peek_char()
+    if c != '>':
         raise ValueError("Expecting '>' at position {0} but was {1}".format(pos, c))
-    getChar()
+    get_char()
 
     return pos_tuple
 
+
 def comma():
-    c = getChar()
-    if (c != ','):
+    c = get_char()
+    if c != ',':
         raise ValueError("Expecting ',' at position {0} but was {1}".format(pos, c))
-    c = getChar()
-    if (c != ' '):
+    c = get_char()
+    if c != ' ':
         raise ValueError("Expecting ' ' at position {0} but was {1}".format(pos, c))
 
+
 def identifier():
-    c = getChar()
+    c = get_char()
     value = ord(c)
-    if not ((value >= 97 and value <= 122)):
+    if not (97 <= value <= 122):
         raise ValueError("Expecting letter at position {0} but was {1}".format(pos, c))
 
-    getChar()
+    get_char()
     return c
+
 
 def number():
     num = ''
-    value = peekChar()
+    value = peek_char()
     if value == '-':
-        num += getChar()
-        value = peekChar()
+        num += get_char()
+        value = peek_char()
 
     ord_value = ord(value)
-    while ((ord_value >= 48 and ord_value <= 57)):
-        num += getChar()
-        ord_value = ord(peekChar())
+    while 48 <= ord_value <= 57:
+        num += get_char()
+        ord_value = ord(peek_char())
 
     return int(num)
+
 
 def arg():
     return identifier(), number()
@@ -99,29 +106,32 @@ def args():
     z = arg()
     return (x[1], y[1], z[1])
 
+
 def apply_velocity(pair):
     position, velocity = pair
-    return ((position[0] + velocity[0], position[1] + velocity[1], position[2] + velocity[2]), velocity)
+    return (position[0] + velocity[0], position[1] + velocity[1], position[2] + velocity[2]), velocity
 
 
 def change(a, b):
     val = 0
-    if (a < b):
+    if a < b:
         val = 1
-    elif (a > b):
+    elif a > b:
         val = -1
     return val
+
 
 def apply_gravity(a, b):
     pos_1, pos_2 = a[0], b[0]
     vel_1, vel_2 = a[1], b[1]
-    
-    new_velocity = (vel_1[0] + change(pos_1[0], pos_2[0]), 
+
+    new_velocity = (vel_1[0] + change(pos_1[0], pos_2[0]),
                     vel_1[1] + change(pos_1[1], pos_2[1]),
                     vel_1[2] + change(pos_1[2], pos_2[2])
-    )
+                    )
 
-    return (pos_1, new_velocity)
+    return pos_1, new_velocity
+
 
 def accumulate_gravity(obj, objects):
     for item in objects:
@@ -129,47 +139,46 @@ def accumulate_gravity(obj, objects):
     return obj
 
 
-with open('day12.txt', 'r') as file: 
+with open('day12.txt', 'r') as file:
     positions = parse()
-    position_and_velocity = list(map(lambda x : (x, (0,0,0)), positions))
+    position_and_velocity = list(map(lambda x: (x, (0, 0, 0)), positions))
 
     x_match, y_match, z_match = False, False, False
     match = False
     c = 1
     while not match:
         for index in range(4):
-            list_slice = position_and_velocity[:index] + position_and_velocity[index+1:]
+            list_slice = position_and_velocity[:index] + position_and_velocity[index + 1:]
             position_and_velocity[index] = accumulate_gravity(position_and_velocity[index], list_slice)
 
-        position_and_velocity = list(map(lambda x :  apply_velocity(x), position_and_velocity))
-    
+        position_and_velocity = list(map(lambda x: apply_velocity(x), position_and_velocity))
+
         if not x_match:
             x_match = (
-                (position_and_velocity[0][1][0] == 0) and
-                (position_and_velocity[1][1][0] == 0) and
-                (position_and_velocity[2][1][0] == 0) and
-                (position_and_velocity[3][1][0] == 0)
+                    (position_and_velocity[0][1][0] == 0) and
+                    (position_and_velocity[1][1][0] == 0) and
+                    (position_and_velocity[2][1][0] == 0) and
+                    (position_and_velocity[3][1][0] == 0)
             )
-            x_cycle = 2*c
+            x_cycle = 2 * c
 
         if not y_match:
             y_match = (
-                position_and_velocity[0][1][1] == 0 and
-                position_and_velocity[1][1][1] == 0 and
-                position_and_velocity[2][1][1] == 0 and
-                position_and_velocity[3][1][1] == 0
+                    position_and_velocity[0][1][1] == 0 and
+                    position_and_velocity[1][1][1] == 0 and
+                    position_and_velocity[2][1][1] == 0 and
+                    position_and_velocity[3][1][1] == 0
             )
-            y_cycle = 2*c
+            y_cycle = 2 * c
 
         if not z_match:
             z_match = (
-                position_and_velocity[0][1][2] == 0 and
-                position_and_velocity[1][1][2] == 0 and
-                position_and_velocity[2][1][2] == 0 and
-                position_and_velocity[3][1][2] == 0
+                    position_and_velocity[0][1][2] == 0 and
+                    position_and_velocity[1][1][2] == 0 and
+                    position_and_velocity[2][1][2] == 0 and
+                    position_and_velocity[3][1][2] == 0
             )
-            z_cycle = 2*c
-
+            z_cycle = 2 * c
 
         match = x_match and y_match and z_match
         if c == 1000:

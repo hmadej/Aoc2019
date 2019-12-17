@@ -3,11 +3,12 @@ from enum import Enum
 from functools import reduce
 from pipes import ConcurrentPipe
 
+
 class Direction(Enum):
     North = 0
-    East  = 1
-    South = 2 
-    West  = 3
+    East = 1
+    South = 2
+    West = 3
 
 
 def rotate(direction, rotation):
@@ -22,12 +23,12 @@ def robot_paint(in_pipe, out_pipe, thread, initial_value):
     thread.start()
     robot_direction = Direction.North
 
-    while (thread.is_alive()):
-        colour   = out_pipe.get_input()
+    while thread.is_alive():
+        colour = out_pipe.get_input()
         rotation = out_pipe.get_input()
         robot_direction = rotate(robot_direction, rotation)
 
-        hull[(x,y)] = colour
+        hull[(x, y)] = colour
 
         if robot_direction == Direction.North:
             y += 1
@@ -38,14 +39,15 @@ def robot_paint(in_pipe, out_pipe, thread, initial_value):
         else:
             x -= 1
 
-        if (x,y) in hull.keys():
-            in_pipe.set_output(hull[(x,y)])
+        if (x, y) in hull.keys():
+            in_pipe.set_output(hull[(x, y)])
         else:
             in_pipe.set_output(0)
 
     thread.join()
 
     return hull
+
 
 def run(program, in_pipe, out_pipe):
     brain = vm.Machine(program, in_pipe, out_pipe, [])
@@ -57,13 +59,13 @@ program = p.parse()
 in_pipe = ConcurrentPipe()
 out_pipe = ConcurrentPipe()
 
-brain = threading.Thread(target = run, args=(program.copy(), in_pipe, out_pipe))
+brain = threading.Thread(target=run, args=(program.copy(), in_pipe, out_pipe))
 hull = robot_paint(in_pipe, out_pipe, brain, 0)
 
 print("Day 11 Part 1:", len(hull.keys()))
 in_pipe.get_input()
 
-brain = threading.Thread(target = run, args=(program.copy(), in_pipe, out_pipe))
+brain = threading.Thread(target=run, args=(program.copy(), in_pipe, out_pipe))
 hull = robot_paint(in_pipe, out_pipe, brain, 1)
 
 positions = hull.keys()
@@ -85,7 +87,6 @@ for y in range((max_y - min_y) + 1):
     rows.append(row)
 
 rows.reverse()
-
 
 print("Day 11 Part 2:")
 for row in rows:

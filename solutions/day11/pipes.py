@@ -1,11 +1,12 @@
 import threading
 
-class ConcurrentPipe():
+
+class ConcurrentPipe:
     def __init__(self):
         self.message = 0
         self.producer_lock = threading.Lock()
         self.consumer_lock = threading.Lock()
-        self.consumer_lock.acquire() 
+        self.consumer_lock.acquire()
         # nothing to be consumer initially
 
     def get_input(self):
@@ -23,7 +24,8 @@ class ConcurrentPipe():
     def inspect(self):
         return self.message
 
-class Pipe():
+
+class Pipe:
     def __init__(self):
         self.message = 0
 

@@ -1,4 +1,3 @@
-
 '''
 program         -> opcode [, opcode]
 opcode          -> '1' arguments | '2' arguments | '99' memory
@@ -18,7 +17,6 @@ LESS = 7
 EQUA = 8
 HALT = 99
 
-
 gPOSITION = 0
 gMEMORY_PTR = 0
 gMEMORY_TABLE = dict()
@@ -28,8 +26,9 @@ class Instruction():
     '''
     modes order C,B,A
     '''
+
     def __init__(self, operation, modes, parameters):
-        #print(modes, operation, parameters)
+        # print(modes, operation, parameters)
         self.op = operation
         self.mode_1, self.mode_2, self.mode_3 = modes
         self.input_1, self.input_2, self.output = parameters
@@ -47,23 +46,23 @@ class Instruction():
 
         elif self.op == JMPT:
             if value1 != 0:
-                _jump(memory, value2)
+                _jump(value2)
 
         elif self.op == JMPF:
             if value1 == 0:
-                _jump(memory, value2)
+                _jump(value2)
 
         elif self.op == LESS:
-            memory[self.output] = (1 if value1<value2 else 0)
+            memory[self.output] = (1 if value1 < value2 else 0)
 
         elif self.op == EQUA:
-            memory[self.output] = (1 if value1==value2 else 0)
+            memory[self.output] = (1 if value1 == value2 else 0)
 
         elif self.op == READ:
             print("INPUT: ")
             value = int(input())
             memory[self.input_1] = value
-    
+
         elif self.op == WRIT:
             print("OUTPUT: {0}".format(value1))
         elif self.op == HALT:
@@ -72,17 +71,18 @@ class Instruction():
             raise ValueError("Unknown Operation {0}".format(self.op))
 
 
-def getChar():
+def get_char():
     global gPOSITION, file
     char = file.read(1)
     gPOSITION += 1
     return char
 
 
-def peekChar():
+def peek_char():
     char = file.read(1)
     file.seek(gPOSITION)
     return char
+
 
 def add_to_table(value):
     global gMEMORY_TABLE, gMEMORY_PTR
@@ -91,20 +91,20 @@ def add_to_table(value):
         gMEMORY_TABLE[gMEMORY_PTR] = value
 
     gMEMORY_PTR += 1
-    
+
 
 def parse():
     global gMEMORY_PTR, gPOSITION, gMEMORY_TABLE
-    
+
     gPOSITION = 0
     gMEMORY_PTR = 0
     gMEMORY_TABLE = dict()
     opcode()
 
-    while (peekChar() == ','):
-        getChar() # consume ','
+    while peek_char() == ',':
+        get_char()  # consume ','
         opcode()
-    
+
 
 def opcode():
     global gMEMORY_PTR
@@ -120,8 +120,8 @@ def opcode():
     '''
     op_string = ''
 
-    while(peekChar() != ',' and peekChar() != ''):
-        op_string += getChar()
+    while peek_char() != ',' and peek_char() != '':
+        op_string += get_char()
 
     if gMEMORY_PTR in gMEMORY_TABLE.keys():
         instr_value = gMEMORY_TABLE[gMEMORY_PTR]
@@ -136,21 +136,21 @@ def opcode():
 
     if op_string[-1] == '1':
         args = arguments3()
-        parameters = (args[0],args[1],args[2])
+        parameters = (args[0], args[1], args[2])
         Instruction(ADD, modes, parameters).execute(gMEMORY_TABLE)
 
     elif op_string[-1] == '2':
         args = arguments3()
-        parameters = (args[0],args[1],args[2])
+        parameters = (args[0], args[1], args[2])
         Instruction(MUL, modes, parameters).execute(gMEMORY_TABLE)
 
     elif op_string[-1] == '3':
         arg = argument()
-        Instruction(READ, modes, (arg,0,0)).execute(gMEMORY_TABLE)
+        Instruction(READ, modes, (arg, 0, 0)).execute(gMEMORY_TABLE)
 
     elif op_string[-1] == '4':
         arg = argument()
-        Instruction(WRIT, modes, (arg,0,0)).execute(gMEMORY_TABLE)
+        Instruction(WRIT, modes, (arg, 0, 0)).execute(gMEMORY_TABLE)
 
     elif op_string[-1] == '5':
         args = arguments2()
@@ -162,22 +162,23 @@ def opcode():
 
     elif op_string[-1] == '7':
         args = arguments3()
-        parameters = (args[0],args[1],args[2])
+        parameters = (args[0], args[1], args[2])
         Instruction(LESS, modes, parameters).execute(gMEMORY_TABLE)
 
     elif op_string[-1] == '8':
         args = arguments3()
-        parameters = (args[0],args[1],args[2])
+        parameters = (args[0], args[1], args[2])
         Instruction(EQUA, modes, parameters).execute(gMEMORY_TABLE)
 
     elif op_string[-1] == '9':
-        if (peekChar() == ''): # no additional memory locations
-            Instruction(HALT, modes, (0,0,0)).execute(gMEMORY_TABLE)
+        if peek_char() == '':  # no additional memory locations
+            Instruction(HALT, modes, (0, 0, 0)).execute(gMEMORY_TABLE)
         else:
             memory()
-            Instruction(HALT, modes, (0,0,0)).execute(gMEMORY_TABLE)
+            Instruction(HALT, modes, (0, 0, 0)).execute(gMEMORY_TABLE)
     else:
         raise ValueError('Invalid opcode {0}'.format(op_string))
+
 
 def param_modes(opcode_string):
     op_length = len(opcode_string)
@@ -198,6 +199,7 @@ def arguments2():
 
     return [input_value1, input_value2]
 
+
 def arguments3():
     input_value1 = argument()
     input_value2 = argument()
@@ -205,10 +207,11 @@ def arguments3():
 
     return [input_value1, input_value2, output_value1]
 
+
 def argument():
     global gMEMORY_PTR
 
-    char = getChar() # consume ,
+    char = get_char()  # consume ,
     val = value()
 
     if gMEMORY_PTR in gMEMORY_TABLE.keys():
@@ -220,44 +223,43 @@ def argument():
     return val
 
 
-def memory(): # may have to be changed now jumps possible
-    while (peekChar() == ','):
-        getChar() # consume ','
+def memory():  # may have to be changed now jumps possible
+    while peek_char() == ',':
+        get_char()  # consume ','
         if gMEMORY_PTR not in gMEMORY_TABLE.keys():
             add_to_table(value())
 
 
 def value():
     digit = ''
-    if (peekChar() == '-'):
-        digit += getChar()
-    while (peekChar() in ['0','1','2','3','4','5','6','7','8','9']):
-        digit += getChar()
+    if peek_char() == '-':
+        digit += get_char()
+    while peek_char() in ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9']:
+        digit += get_char()
 
     return int(digit)
 
 
-
-def _jump(memory, pointer):
+def _jump(pointer):
     global file, gPOSITION, gMEMORY_PTR
 
     offset = gMEMORY_PTR - pointer
     if offset > 0:
-        while (offset != 0):
-            if (peekChar() == ','):
+        while offset != 0:
+            if peek_char() == ',':
                 offset -= 1
                 argument()
-            elif (peekChar() == ''):
+            elif peek_char() == '':
                 break
 
     else:
         gPOSITION = 0
         gMEMORY_PTR = 0
         file.seek(0)
-        while (gMEMORY_PTR != pointer):
-            if (peekChar() == ','):
+        while gMEMORY_PTR != pointer:
+            if peek_char() == ',':
                 gMEMORY_PTR += 1
-            getChar()
+            get_char()
 
         gPOSITION -= 1
         file.seek(gPOSITION)
@@ -270,23 +272,22 @@ def _seek(memory, pointer):
         return memory[pointer]
     else:
         offset = 0
-        temp_gPOSITION = gPOSITION
+        temp_g_position = gPOSITION
         gPOSITION = 0
         file.seek(0)
-        while (offset != pointer):
-            if (peekChar() == ','):
+        while offset != pointer:
+            if peek_char() == ',':
                 offset += 1
-            getChar()
+            get_char()
 
-
-        if (peekChar() == ','):
-            getChar() # consume ','
+        if peek_char() == ',':
+            get_char()  # consume ','
 
         val = value()
         memory[pointer] = val
 
-        file.seek(temp_gPOSITION)
-        gPOSITION = temp_gPOSITION
+        file.seek(temp_g_position)
+        gPOSITION = temp_g_position
         return memory[pointer]
 
 

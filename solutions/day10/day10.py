@@ -3,7 +3,6 @@ from time import sleep
 
 gPOSITION = 0
 
-
 '''
 parse    -> row ['\n' row]
 row      -> node [node]
@@ -12,7 +11,8 @@ empty    -> '.'
 asteroid -> '#'
 '''
 
-def getChar():
+
+def get_char():
     global gPOSITION, file
     char = file.read(1)
     gPOSITION += 1
@@ -20,44 +20,46 @@ def getChar():
     return char
 
 
-def peekChar():
+def peek_char():
     char = file.read(1)
     file.seek(gPOSITION)
 
     return char
+
 
 def parse():
     asteroid_map = []
     galaxy_map = dict()
     y = 0
     x = row(asteroid_map, galaxy_map, y)
-    while (peekChar() != ''):
+    while peek_char() != '':
         y += 1
-        getChar()
+        get_char()
         row(asteroid_map, galaxy_map, y)
 
     return (x, y), asteroid_map, galaxy_map
 
+
 def row(map, map2, y):
     x = 0
-    c = getChar()
+    c = get_char()
     if c == '#':
-        map.append((x,y))
+        map.append((x, y))
 
-    map2[(x,y)] = c
+    map2[(x, y)] = c
     x += 1
 
-    while (peekChar() != ''):
-        if (peekChar() == '\n'):
+    while peek_char() != '':
+        if peek_char() == '\n':
             return x
         else:
-            c = peekChar()
+            c = peek_char()
             if c == '#':
-                getChar()
-                map.append((x,y))
+                get_char()
+                map.append((x, y))
             elif c == '.':
-                getChar()
-            map2[(x,y)] = c
+                get_char()
+            map2[(x, y)] = c
 
             x += 1
     return x
@@ -66,9 +68,10 @@ def row(map, map2, y):
 def draw(map):
     for y in range(41):
         for x in range(41):
-            print(map[(x,y)], end = '')
+            print(map[(x, y)], end='')
         print()
     sleep(0.1)
+
 
 def quadrant(a, b):
     x = a[0] - b[0]
@@ -78,17 +81,18 @@ def quadrant(a, b):
         q = 1
     elif x < 0 and y < 0:
         q = 3
-    elif x < 0 and y >= 0:
+    elif x < 0 <= y:
         q = 2
     else:
         q = 0
 
     return q
 
+
 def visible(asteroid_map, start, w):
     count = 0
     slopes = [set(), set(), set(), set()]
-    slope_maps = [[],[],[],[]]
+    slope_maps = [[], [], [], []]
     for asteroid in asteroid_map:
         num = asteroid[0] - start[0]
         denom = asteroid[1] - start[1]
@@ -103,7 +107,7 @@ def visible(asteroid_map, start, w):
             count += 1
 
         slope_maps[q].append((slope, asteroid))
-    
+
     return count, slope_maps
 
 
@@ -148,7 +152,7 @@ def sweep(asteroid_map, gmap):
 
 with open('day10.txt', 'r') as file:
     dimensions, asteroid_map, galaxy_map = parse()
-    max_asteroid = (0,0)
+    max_asteroid = (0, 0)
     max_count = 0
     max_slope_maps = []
     for asteroid in asteroid_map:
@@ -160,15 +164,12 @@ with open('day10.txt', 'r') as file:
             max_asteroid = asteroid
             max_slope_maps = slope_maps
 
-
     for index in range(4):
-        max_slope_maps[index].sort(key = lambda x : dist(max_asteroid, x[1]))
-        max_slope_maps[index].sort(key = lambda x : x[0], reverse = True)
+        max_slope_maps[index].sort(key=lambda x: dist(max_asteroid, x[1]))
+        max_slope_maps[index].sort(key=lambda x: x[0], reverse=True)
 
     galaxy_map[max_asteroid] = 'X'
 
     asteroid_200 = sweep(max_slope_maps, galaxy_map)
     print("Day 10 Part 1: {0}".format(max_count))
     print("Day 10 Part 2: {0}".format(asteroid_200))
-
-    
