@@ -1,4 +1,4 @@
-import vm, threading, time
+import vm, threading
 from pipes import ConcurrentPipe, Pipe
 
 program = vm.Parser('day13.txt').parse()
